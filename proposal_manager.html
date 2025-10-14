@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Silicon Capital • PPTX Generator</title>
+    <link rel="stylesheet" href="./public/css/style.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <header>
+          <div class="brand">
+            <!-- ▼▼ PUT YOUR LOGO FILE HERE ▼▼ -->
+            <div class="logo-slot" title="Your logo">
+              <img src="./public/img/logo.png" alt="Logo" />
+              <!-- ^^^^^ Line to edit: set src to your logo path (e.g., ./assets/logo.png) -->
+            </div>
+            <!-- ▲▲ LOGO SLOT ▲▲ -->
+            <div>
+              <h1>Silicon Capital — PPTX Generator</h1>
+              <p class="hint">
+                Fill the fields, click <b>Generate</b>, and your presentation
+                will download.
+              </p>
+            </div>
+          </div>
+          <!-- API badge removed on purpose -->
+        </header>
+
+        <div class="grid two">
+          <div>
+            <label>Company Name</label>
+            <input id="company_name" placeholder="Acme Corp" />
+          </div>
+          <div>
+            <label>Contact Email (optional)</label>
+            <input
+              id="contact_email"
+              type="email"
+              placeholder="jane@acme.com"
+            />
+          </div>
+        </div>
+
+        <div class="section">
+          <p class="hint" style="margin: 0 0 8px 2px">
+            Pricing (fill only the fields you want to override)
+          </p>
+          <div class="grid two">
+            <div>
+              <label>SETUP_FEE (€)</label>
+              <input
+                id="SETUP_FEE"
+                type="number"
+                min="0"
+                placeholder="e.g., 1500"
+              />
+            </div>
+            <div>
+              <label>SHORT_FEE (€)</label>
+              <input
+                id="SHORT_FEE"
+                type="number"
+                min="0"
+                placeholder="e.g., 3500"
+              />
+            </div>
+            <div>
+              <label>FULL_FEE (€)</label>
+              <input
+                id="FULL_FEE"
+                type="number"
+                min="0"
+                placeholder="e.g., 12000"
+              />
+            </div>
+            <div>
+              <label>GRANT_FEE (%)</label>
+              <input id="GRANT_FEE" placeholder="e.g., 9%" />
+            </div>
+            <div>
+              <label>EQUITY_FEE (%)</label>
+              <input id="EQUITY_FEE" placeholder="e.g., 3%" />
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div
+            class="row"
+            style="justify-content: space-between; margin-bottom: 8px"
+          >
+            <p class="hint" style="margin: 0">
+              Slide toggles (use tags in notes: <code>[[tag:pricing]]</code>)
+            </p>
+            <button class="btn ghost" id="addDefaultTags">
+              Add default tags
+            </button>
+          </div>
+          <div id="tagList" class="grid" style="gap: 12px"></div>
+          <div class="row" style="margin-top: 8px">
+            <input
+              id="newTag"
+              placeholder="new_tag (no spaces)"
+              style="max-width: 280px"
+            />
+            <button class="btn ghost" id="addTagBtn">Add tag</button>
+            <button class="btn ghost" id="clearTagsBtn">Clear</button>
+          </div>
+        </div>
+
+        <div class="section row" style="justify-content: space-between">
+          <div class="status" id="status"></div>
+          <div class="row">
+            <button class="btn ghost" id="testBtn">Fill demo</button>
+            <button class="btn" id="submitBtn">Generate PPTX</button>
+          </div>
+        </div>
+
+        <div class="footer">© Silicon Capital • Static frontend • Powered by Chupi</div>
+      </div>
+    </div>
+
+    <!-- Loading toast (bottom-left) -->
+    <div
+      id="loadingToast"
+      class="loading-toast"
+      aria-live="polite"
+      aria-busy="true"
+      hidden
+    >
+      <div class="spinner"></div>
+      <span>Loading…</span>
+    </div>
+
+    <script>
+      // Keep your existing API endpoint (no badge is shown in the UI)
+      const API_URL = "https://backendscp.onrender.com/render";
+
+      const statusEl = document.getElementById("status");
+      const toastEl = document.getElementById("loadingToast");
+
+      function setStatus(msg, cls) {
+        statusEl.className = "status" + (cls ? " " + cls : "");
+        statusEl.textContent = msg || "";
+      }
+      function showLoading() {
+        toastEl.hidden = false;
+      }
+      function hideLoading() {
+        toastEl.hidden = true;
+      }
+
+      // --- Slide toggles
+      const tagListEl = document.getElementById("tagList");
+      const slideToggles = {}; // {tag: bool}
+
+      function renderTagRow(name, on) {
+        const row = document.createElement("div");
+        row.className = "tag-grid";
+
+        const label = document.createElement("div");
+        label.innerHTML = `<label style="margin:0">${name}</label>`;
+        const sw = document.createElement("div");
+        sw.className = "switch" + (on ? " on" : "");
+        sw.onclick = () => {
+          slideToggles[name] = !slideToggles[name];
+          drawTags();
+        };
+
+        row.appendChild(label);
+        row.appendChild(sw);
+        return row;
+      }
+
+      function drawTags() {
+        tagListEl.innerHTML = "";
+        Object.entries(slideToggles).forEach(([k, v]) => {
+          tagListEl.appendChild(renderTagRow(k, v));
+        });
+      }
+
+      document.getElementById("addTagBtn").onclick = () => {
+        const t = (document.getElementById("newTag").value || "").trim();
+        if (!t) return;
+        slideToggles[t] = true;
+        document.getElementById("newTag").value = "";
+        drawTags();
+      };
+      document.getElementById("clearTagsBtn").onclick = () => {
+        for (const k of Object.keys(slideToggles)) delete slideToggles[k];
+        drawTags();
+      };
+      document.getElementById("addDefaultTags").onclick = () => {
+        Object.assign(slideToggles, {
+          cover: true,
+          pricing: true,
+          eic_overview: true,
+          alt_public_funding: true,
+          why_silicon: true,
+        });
+        drawTags();
+      };
+
+      // --- Helpers
+      function v(id) {
+        return document.getElementById(id).value.trim();
+      }
+      function buildPricing() {
+        const obj = {};
+        const ints = ["SETUP_FEE", "SHORT_FEE", "FULL_FEE"];
+        ints.forEach((k) => {
+          if (v(k) !== "") obj[k] = Number(v(k));
+        });
+        if (v("GRANT_FEE") !== "") obj["GRANT_FEE"] = v("GRANT_FEE");
+        if (v("EQUITY_FEE") !== "") obj["EQUITY_FEE"] = v("EQUITY_FEE");
+        return obj;
+      }
+      function buildPayload() {
+        return {
+          company_name: v("company_name"),
+          contact_email: v("contact_email") || undefined,
+          pricing_overrides: buildPricing(),
+          slide_toggles: slideToggles,
+        };
+      }
+
+      // Demo quick fill
+      document.getElementById("testBtn").onclick = () => {
+        document.getElementById("company_name").value = "Acme Corp";
+        document.getElementById("SETUP_FEE").value = 1500;
+        document.getElementById("SHORT_FEE").value = 3500;
+        document.getElementById("FULL_FEE").value = 12000;
+        document.getElementById("GRANT_FEE").value = "9%";
+        document.getElementById("EQUITY_FEE").value = "3%";
+        Object.assign(slideToggles, { cover: true, pricing: true });
+        drawTags();
+        setStatus("Demo fields loaded.");
+      };
+
+      // Submit
+      document.getElementById("submitBtn").onclick = async () => {
+        setStatus("");
+        const payload = buildPayload();
+
+        if (!payload.company_name) {
+          setStatus("Company Name is required.", "err");
+          return;
+        }
+        try {
+          setStatus("Generating…");
+          showLoading();
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) {
+            const txt = await res.text();
+            throw new Error(`HTTP ${res.status}: ${txt}`);
+          }
+          const blob = await res.blob();
+          const fname = `proposal_${payload.company_name.replace(
+            /\s+/g,
+            "_"
+          )}.pptx`;
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = fname;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          setStatus("Presentation downloaded ✅", "ok");
+        } catch (err) {
+          console.error(err);
+          setStatus("Error: " + err.message, "err");
+        } finally {
+          hideLoading();
+        }
+      };
+
+      // init
+      drawTags();
+    </script>
+  </body>
+</html>

@@ -1,304 +1,70 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Silicon Capital • PPTX Generator</title>
-  <style>
-    :root{
-      --bg:#0b0f14;
-      --card:#0f141b;
-      --ink:#e7f0ff;
-      --muted:#99a7bd;
-      --line:#1c2430;
-      --accent:#64d2ff;
-      --accent2:#9b66ff;
-      --ok:#28d198;
-      --err:#ff6b6b;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--ink);
-      font:14px/1.45 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      background: radial-gradient(1200px 600px at 10% 110%, rgba(0,255,170,.18), transparent 60%),
-                  radial-gradient(1200px 600px at 100% -10%, rgba(130,0,255,.16), transparent 60%),
-                  linear-gradient(180deg, #0b0f14 0%, #0a121a 100%);
-      min-height:100%;
-    }
-    .wrap{display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px;}
-    .card{
-      width:min(980px, 100%);
-      background: color-mix(in oklab, var(--card) 92%, black);
-      border:1px solid var(--line);
-      border-radius:18px; padding:22px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      backdrop-filter: blur(4px);
-    }
-    header{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:12px;}
-    .brand{
-      display:flex; align-items:center; gap:12px;
-    }
-    .logo{
-      width:38px; height:38px; border-radius:10px;
-      background: conic-gradient(from 160deg, var(--accent), var(--accent2), var(--accent));
-      box-shadow: 0 0 24px rgba(121, 106, 255, .35), inset 0 0 12px rgba(0,0,0,.35);
-    }
-    h1{font-size:18px; margin:0}
-    .hint{color:var(--muted); margin:0; font-size:13px}
-    .grid{display:grid; gap:12px}
-    .two{grid-template-columns: repeat(2, minmax(0,1fr));}
-    @media (max-width:720px){ .two{grid-template-columns: 1fr;} }
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Silicon Capital App</title>
+    <link rel="stylesheet" href="./public/css/style.css" />
+    <style>
+      .main-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        color: var(--ink);
+        background: radial-gradient(
+            1200px 600px at 10% 110%,
+            rgba(0, 255, 170, 0.18),
+            transparent 60%
+          ),
+          radial-gradient(
+            1200px 600px at 100% -10%,
+            rgba(130, 0, 255, 0.16),
+            transparent 60%
+          ),
+          linear-gradient(180deg, #0b0f14 0%, #0a121a 100%);
+      }
 
-    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px 2px}
-    input{
-      width:100%;
-      background:#0a0f15;
-      border:1px solid var(--line);
-      color:var(--ink);
-      padding:11px 12px;
-      border-radius:12px;
-      outline:none;
-      transition:border-color .18s, box-shadow .18s;
-    }
-    input:focus{
-      border-color: color-mix(in oklab, var(--accent) 70%, var(--accent2) 30%);
-      box-shadow: 0 0 0 3px rgba(100,210,255,.15);
-    }
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    .btn{
-      appearance:none; border:0; cursor:pointer;
-      border-radius:999px; padding:12px 16px; font-weight:600;
-      color:white;
-      background: linear-gradient(90deg, color-mix(in oklab, var(--accent) 70%, #3ad) , var(--accent2));
-      box-shadow: 0 8px 24px rgba(110, 110, 255, .28);
-      transition: transform .06s ease, filter .18s ease;
-    }
-    .btn:hover{ filter:brightness(1.08) }
-    .btn:active{ transform:translateY(1px) }
-    .btn.ghost{
-      background:transparent; color:var(--ink);
-      border:1px solid var(--line);
-      box-shadow:none;
-    }
-    .section{border-top:1px dashed var(--line); margin:14px 0; padding-top:14px}
-    .status{font-size:13px}
-    .status.ok{color:var(--ok)}
-    .status.err{color:var(--err)}
-    .footer{margin-top:10px; color:var(--muted); font-size:12px; text-align:center}
-    .chip{
-      display:inline-flex; align-items:center; gap:8px; padding:8px 12px;
-      background:#0a1119; border:1px solid var(--line); border-radius:999px;
-      font-size:12px; color:var(--muted);
-    }
-    .switch{ position:relative; width:48px; height:28px; background:#1a2330; border-radius:999px; cursor:pointer; border:1px solid var(--line);}
-    .switch::after{content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#e6f0ff; transition:.18s}
-    .switch.on{ background:linear-gradient(90deg, var(--accent), var(--accent2));}
-    .switch.on::after{ transform: translateX(20px); background:white;}
-    .tag-grid{display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center;}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="card">
-      <header>
-        <div class="brand">
-          <div class="logo" aria-hidden="true"></div>
-          <div>
-            <h1>Silicon Capital — PPTX Generator</h1>
-            <p class="hint">Rellena los campos, pulsa <b>Generar</b> y se descargará tu presentación.</p>
-          </div>
-        </div>
-        <span class="chip">API <span id="apiHost">http://127.0.0.1:8000</span></span>
-      </header>
+      .main-card {
+        background: color-mix(in oklab, var(--card) 92%, black);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(4px);
+        max-width: 480px;
+      }
 
-      <div class="grid two">
-        <div>
-          <label>Company Name</label>
-          <input id="company_name" placeholder="Acme Corp" />
-        </div>
-        <div>
-          <label>Contact Email (opcional)</label>
-          <input id="contact_email" type="email" placeholder="jane@acme.com" />
-        </div>
-      </div>
+      .main-btn {
+        margin-top: 20px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        border: none;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 12px 22px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: transform 0.1s ease, filter 0.2s ease;
+      }
 
-      <div class="section">
-        <p class="hint" style="margin:0 0 8px 2px;">Pricing (solo rellena lo que quieras sobrescribir)</p>
-        <div class="grid two">
-          <div>
-            <label>SETUP_FEE (€)</label>
-            <input id="SETUP_FEE" type="number" min="0" placeholder="p. ej., 1500" />
-          </div>
-          <div>
-            <label>SHORT_FEE (€)</label>
-            <input id="SHORT_FEE" type="number" min="0" placeholder="p. ej., 3500" />
-          </div>
-          <div>
-            <label>FULL_FEE (€)</label>
-            <input id="FULL_FEE" type="number" min="0" placeholder="p. ej., 12000" />
-          </div>
-          <div>
-            <label>GRANT_FEE (%)</label>
-            <input id="GRANT_FEE" placeholder="p. ej., 9%" />
-          </div>
-          <div>
-            <label>EQUITY_FEE (%)</label>
-            <input id="EQUITY_FEE" placeholder="p. ej., 3%" />
-          </div>
+      .main-btn:hover {
+        filter: brightness(1.1);
+      }
+      .main-btn:active {
+        transform: scale(0.97);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+        <div class="main-card">
+            <h1>Welcome to Silicon Capital App</h1>
+            <p>Here you will find different windows</p>
+            <button class="main-btn" onclick="location.href='proposal_manager.html'">Go to Proposal Manager</button>
         </div>
-      </div>
-
-      <div class="section">
-        <div class="row" style="justify-content:space-between; margin-bottom:8px">
-          <p class="hint" style="margin:0">Slide toggles (usa tags en notas: <code>[[tag:pricing]]</code>)</p>
-          <button class="btn ghost" id="addDefaultTags">Añadir tags por defecto</button>
-        </div>
-        <div id="tagList" class="grid" style="gap:12px"></div>
-        <div class="row" style="margin-top:8px">
-          <input id="newTag" placeholder="nuevo_tag (sin espacios)" style="max-width:280px" />
-          <button class="btn ghost" id="addTagBtn">Añadir tag</button>
-          <button class="btn ghost" id="clearTagsBtn">Limpiar</button>
-        </div>
-      </div>
-
-      <div class="section row" style="justify-content:space-between;">
-        <div class="status" id="status"></div>
-        <div class="row">
-          <button class="btn ghost" id="testBtn">Rellenar demo</button>
-          <button class="btn" id="submitBtn">Generar PPTX</button>
-        </div>
-      </div>
-
-      <div class="footer">© Silicon Capital • Frontend estático</div>
     </div>
-  </div>
-
-  <script>
-    // Cambia esto si tu API no está en localhost
-    const API_URL = "http://127.0.0.1:8000/render";
-    document.getElementById("apiHost").textContent = API_URL.replace('/render','');
-
-    const statusEl = document.getElementById("status");
-    function setStatus(msg, cls){
-      statusEl.className = "status" + (cls ? " " + cls : "");
-      statusEl.textContent = msg || "";
-    }
-
-    // --- Slide toggles
-    const tagListEl = document.getElementById("tagList");
-    const slideToggles = {}; // {tag: bool}
-
-    function renderTagRow(name, on){
-      const row = document.createElement("div");
-      row.className = "tag-grid";
-
-      const label = document.createElement("div");
-      label.innerHTML = `<label style="margin:0">${name}</label>`;
-      const sw = document.createElement("div");
-      sw.className = "switch" + (on ? " on" : "");
-      sw.onclick = () => {
-        slideToggles[name] = !slideToggles[name];
-        drawTags();
-      };
-
-      row.appendChild(label);
-      row.appendChild(sw);
-      return row;
-    }
-
-    function drawTags(){
-      tagListEl.innerHTML = "";
-      Object.entries(slideToggles).forEach(([k,v]) => {
-        tagListEl.appendChild(renderTagRow(k, v));
-      });
-    }
-
-    document.getElementById("addTagBtn").onclick = () => {
-      const t = (document.getElementById("newTag").value || "").trim();
-      if(!t) return;
-      slideToggles[t] = true;
-      document.getElementById("newTag").value = "";
-      drawTags();
-    };
-    document.getElementById("clearTagsBtn").onclick = () => {
-      for (const k of Object.keys(slideToggles)) delete slideToggles[k];
-      drawTags();
-    };
-    document.getElementById("addDefaultTags").onclick = () => {
-      Object.assign(slideToggles, { cover:true, pricing:true, eic_overview:true, alt_public_funding:true, why_silicon:true });
-      drawTags();
-    };
-
-    // --- Helpers
-    function v(id){ return document.getElementById(id).value.trim(); }
-    function buildPricing(){
-      const obj = {};
-      const ints = ["SETUP_FEE","SHORT_FEE","FULL_FEE"];
-      ints.forEach(k => { if(v(k)!=="") obj[k] = Number(v(k)); });
-      if(v("GRANT_FEE")!=="")  obj["GRANT_FEE"]  = v("GRANT_FEE");
-      if(v("EQUITY_FEE")!=="") obj["EQUITY_FEE"] = v("EQUITY_FEE");
-      return obj;
-    }
-    function buildPayload(){
-      const payload = {
-        company_name: v("company_name"),
-        contact_email: v("contact_email") || undefined,
-        pricing_overrides: buildPricing(),
-        slide_toggles: slideToggles
-      };
-      return payload;
-    }
-
-    // Demo quick fill
-    document.getElementById("testBtn").onclick = () => {
-      document.getElementById("company_name").value = "Acme Corp";
-      document.getElementById("SETUP_FEE").value = 1500;
-      document.getElementById("SHORT_FEE").value = 3500;
-      document.getElementById("FULL_FEE").value = 12000;
-      document.getElementById("GRANT_FEE").value = "9%";
-      document.getElementById("EQUITY_FEE").value = "3%";
-      Object.assign(slideToggles, { cover:true, pricing:true });
-      drawTags();
-      setStatus("Campos de demo cargados.");
-    };
-
-    // Submit
-    document.getElementById("submitBtn").onclick = async () => {
-      setStatus("");
-      const payload = buildPayload();
-
-      if(!payload.company_name){
-        setStatus("Falta el Company Name.", "err");
-        return;
-      }
-      try{
-        setStatus("Generando…");
-        const res = await fetch(API_URL, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
-        if(!res.ok){
-          const txt = await res.text();
-          throw new Error(`HTTP ${res.status}: ${txt}`);
-        }
-        const blob = await res.blob();
-        const fname = `proposal_${payload.company_name.replace(/\s+/g,'_')}.pptx`;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = fname;
-        document.body.appendChild(a); a.click(); a.remove();
-        URL.revokeObjectURL(url);
-        setStatus("Presentación descargada ✅", "ok");
-      }catch(err){
-        console.error(err);
-        setStatus("Error: " + err.message, "err");
-      }
-    };
-
-    // arranque
-    drawTags();
-  </script>
-</body>
+  </body>
 </html>
