@@ -275,3 +275,52 @@ input:focus {
         transform: rotate(360deg);
     }
 }
+
+/* --- NUEVO BLOQUE AÑADIDO --- */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    color: var(--ink);
+    background: radial-gradient(1200px 600px at 10% 110%,
+            rgba(0, 255, 170, 0.18),
+            transparent 60%),
+        radial-gradient(1200px 600px at 100% -10%,
+            rgba(130, 0, 255, 0.16),
+            transparent 60%),
+        linear-gradient(180deg, #0b0f14 0%, #0a121a 100%);
+}
+
+.main-card {
+    background: color-mix(in oklab, var(--card) 92%, black);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    max-width: 480px;
+}
+
+.main-btn {
+    margin-top: 20px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.main-btn:hover {
+    filter: brightness(1.1);
+}
+
+.main-btn:active {
+    transform: scale(0.97);
+}
