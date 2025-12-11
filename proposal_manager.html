@@ -3,29 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Silicon Capital • PPTX Generator</title>
+    <title>Proposal Manager</title>
+
     <link rel="stylesheet" href="./public/css/style.css" />
   </head>
+
   <body>
     <div class="wrap">
       <div class="card">
+
         <header>
           <div class="brand">
-            <!-- ▼▼ PUT YOUR LOGO FILE HERE ▼▼ -->
-            <div class="logo-slot" title="Your logo">
+            <div class="logo-slot">
               <img src="./public/img/logo.png" alt="Logo" />
-              <!-- ^^^^^ Line to edit: set src to your logo path (e.g., ./assets/logo.png) -->
             </div>
-            <!-- ▲▲ LOGO SLOT ▲▲ -->
             <div>
-              <h1>Silicon Capital — PPTX Generator</h1>
-              <p class="hint">
-                Fill the fields, click <b>Generate</b>, and your presentation
-                will download.
-              </p>
+              <h1>Proposal Manager</h1>
+              <p class="hint">Generate PPTX or PDF with automatic slide control.</p>
             </div>
           </div>
-          <!-- API badge removed on purpose -->
         </header>
 
         <div class="grid two">
@@ -33,259 +29,290 @@
             <label>Company Name</label>
             <input id="company_name" placeholder="Acme Corp" />
           </div>
+
           <div>
             <label>Contact Email (optional)</label>
-            <input
-              id="contact_email"
-              type="email"
-              placeholder="jane@acme.com"
-            />
+            <input id="contact_email" placeholder="contact@company.com" />
           </div>
         </div>
 
         <div class="section">
-          <p class="hint" style="margin: 0 0 8px 2px">
-            Pricing (fill only the fields you want to override)
-          </p>
+          <p class="hint">Pricing overrides (optional)</p>
+
           <div class="grid two">
             <div>
               <label>SETUP_FEE (€)</label>
-              <input
-                id="SETUP_FEE"
-                type="number"
-                min="0"
-                placeholder="e.g., 1500"
-              />
+              <input id="SETUP_FEE" type="number" min="0" placeholder="1500" />
             </div>
             <div>
               <label>SHORT_FEE (€)</label>
-              <input
-                id="SHORT_FEE"
-                type="number"
-                min="0"
-                placeholder="e.g., 3500"
-              />
+              <input id="SHORT_FEE" type="number" min="0" placeholder="3500" />
             </div>
             <div>
               <label>FULL_FEE (€)</label>
-              <input
-                id="FULL_FEE"
-                type="number"
-                min="0"
-                placeholder="e.g., 12000"
-              />
+              <input id="FULL_FEE" type="number" min="0" placeholder="12000" />
             </div>
             <div>
               <label>GRANT_FEE (%)</label>
-              <input id="GRANT_FEE" placeholder="e.g., 9%" />
+              <input id="GRANT_FEE" placeholder="9%" />
             </div>
             <div>
               <label>EQUITY_FEE (%)</label>
-              <input id="EQUITY_FEE" placeholder="e.g., 3%" />
+              <input id="EQUITY_FEE" placeholder="3%" />
             </div>
           </div>
         </div>
+        
+        <div class="section">
+          <p class="hint">Remove specific slides by number (e.g., 3, 5, 8). Pages disabled by tags are removed first.</p>
+          <div>
+            <label>Slides to Remove (optional)</label>
+            <input id="remove_slides" placeholder="e.g., 3, 5, 8" />
+          </div>
+        </div>
+        <div class="section">
+          <p class="hint">Enable/Disable slides — disabled ones will be removed.</p>
+
+          <div id="tagList" class="toggle-list"></div>
+        </div>
 
         <div class="section">
-          <div
-            class="row"
-            style="justify-content: space-between; margin-bottom: 8px"
-          >
-            <p class="hint" style="margin: 0">
-              Slide toggles (use tags in notes: <code>[[tag:pricing]]</code>)
-            </p>
-            <button class="btn ghost" id="addDefaultTags">
-              Add default tags
-            </button>
-          </div>
-          <div id="tagList" class="grid" style="gap: 12px"></div>
-          <div class="row" style="margin-top: 8px">
-            <input
-              id="newTag"
-              placeholder="new_tag (no spaces)"
-              style="max-width: 280px"
-            />
-            <button class="btn ghost" id="addTagBtn">Add tag</button>
-            <button class="btn ghost" id="clearTagsBtn">Clear</button>
-          </div>
-        </div>
-
-        <div class="section row" style="justify-content: space-between">
           <div class="status" id="status"></div>
-          <div class="row">
-            <button class="btn ghost" id="testBtn">Fill demo</button>
-            <button class="btn" id="submitBtn">Generate PPTX</button>
+
+          <div class="row" style="justify-content: flex-end; gap: 12px;">
+            <button class="btn ghost" id="testBtn">Demo Fill</button>
+            <button class="btn" id="btnPPTX">Generate PPTX</button>
+            <button class="btn" id="btnPDF">Generate PDF</button>
           </div>
         </div>
 
-        <div class="footer">
-          © Silicon Capital • Static frontend • Powered by Chupi
-        </div>
+        <div class="footer">© Silicon Capital • Powered by Chupi</div>
+
       </div>
     </div>
 
-    <!-- Loading toast (bottom-left) -->
-    <div
-      id="loadingToast"
-      class="loading-toast"
-      aria-live="polite"
-      aria-busy="true"
-      hidden
-    >
+    <div id="loadingToast" class="loading-toast" hidden>
       <div class="spinner"></div>
-      <span>Loading…</span>
+      <span>Generating…</span>
     </div>
 
     <script>
-      // Keep your existing API endpoint (no badge is shown in the UI)
-      const API_URL = "https://backendscp-1.onrender.com/render_pdf";
+      /* API endpoints */
+      const API_PPTX = "https://backendscp-1.onrender.com/render";
+      const API_PDF  = "https://backendscp-1.onrender.com/render_pdf";
+      // NUEVOS ENDPOINTS PERSONALIZADOS
+      const API_PPTX_CUSTOM = "https://backendscp-1.onrender.com/render_pptx_custom";
+      const API_PDF_CUSTOM  = "https://backendscp-1.onrender.com/render_pdf_custom";
+
 
       const statusEl = document.getElementById("status");
-      const toastEl = document.getElementById("loadingToast");
+      const toastEl  = document.getElementById("loadingToast");
 
-      function setStatus(msg, cls) {
-        statusEl.className = "status" + (cls ? " " + cls : "");
-        statusEl.textContent = msg || "";
-      }
-      function showLoading() {
-        toastEl.hidden = false;
-      }
-      function hideLoading() {
-        toastEl.hidden = true;
+      function setStatus(msg, cls){
+        statusEl.className = "status " + (cls || "");
+        statusEl.textContent = msg;
       }
 
-      // --- Slide toggles
+      function showLoading(){ toastEl.hidden = false; }
+      function hideLoading(){ toastEl.hidden = true; }
+
+      /* SLIDE TOGGLES */
+      const slideToggles = {};
       const tagListEl = document.getElementById("tagList");
-      const slideToggles = {}; // {tag: bool}
-
-      function renderTagRow(name, on) {
-        const row = document.createElement("div");
-        row.className = "tag-grid";
-
-        const label = document.createElement("div");
-        label.innerHTML = `<label style="margin:0">${name}</label>`;
-        const sw = document.createElement("div");
-        sw.className = "switch" + (on ? " on" : "");
-        sw.onclick = () => {
-          slideToggles[name] = !slideToggles[name];
-          drawTags();
-        };
-
-        row.appendChild(label);
-        row.appendChild(sw);
-        return row;
-      }
 
       function drawTags() {
         tagListEl.innerHTML = "";
-        Object.entries(slideToggles).forEach(([k, v]) => {
-          tagListEl.appendChild(renderTagRow(k, v));
+
+        Object.entries(slideToggles).forEach(([tag, active]) => {
+          const item = document.createElement("div");
+          item.className = "toggle-item";
+
+          const label = document.createElement("div");
+          label.className = "toggle-label";
+          label.textContent = tag;
+
+          const sw = document.createElement("div");
+          sw.className = "switch" + (active ? " on" : "");
+          sw.onclick = () => {
+            slideToggles[tag] = !slideToggles[tag];
+            drawTags();
+          };
+
+          item.appendChild(label);
+          item.appendChild(sw);
+          tagListEl.appendChild(item);
         });
       }
 
-      document.getElementById("addTagBtn").onclick = () => {
-        const t = (document.getElementById("newTag").value || "").trim();
-        if (!t) return;
-        slideToggles[t] = true;
-        document.getElementById("newTag").value = "";
-        drawTags();
-      };
-      document.getElementById("clearTagsBtn").onclick = () => {
-        for (const k of Object.keys(slideToggles)) delete slideToggles[k];
-        drawTags();
-      };
-      document.getElementById("addDefaultTags").onclick = () => {
-        Object.assign(slideToggles, {
-          cover: true,
-          pricing: true,
-          eic_overview: true,
-          alt_public_funding: true,
-          why_silicon: true,
-        });
-        drawTags();
-      };
+      /* LOAD TAGS FROM BACKEND */
+      async function loadTagsFromBackend() {
+        try {
+          // El endpoint /get_tags no se proporcionó, pero mantengo la estructura
+          // Asumo que si falla, los toggles simplemente no aparecen.
+          const res = await fetch("https://backendscp-1.onrender.com/get_tags");
+          const data = await res.json();
 
-      // --- Helpers
-      function v(id) {
-        return document.getElementById(id).value.trim();
+          data.tags.forEach(tag => {
+            if (!(tag in slideToggles)) slideToggles[tag] = true;
+          });
+
+          drawTags();
+        } catch (e) {
+          console.error("Error loading tags:", e);
+        }
       }
-      function buildPricing() {
-        const obj = {};
-        const ints = ["SETUP_FEE", "SHORT_FEE", "FULL_FEE"];
-        ints.forEach((k) => {
-          if (v(k) !== "") obj[k] = Number(v(k));
+
+      loadTagsFromBackend();
+
+      /* HELPERS */
+      function v(id){ return document.getElementById(id).value.trim(); }
+
+      function buildPricing(){
+        const o = {};
+        ["SETUP_FEE","SHORT_FEE","FULL_FEE"].forEach(k=>{
+          if(v(k)!=="") o[k] = Number(v(k));
         });
-        if (v("GRANT_FEE") !== "") obj["GRANT_FEE"] = v("GRANT_FEE");
-        if (v("EQUITY_FEE") !== "") obj["EQUITY_FEE"] = v("EQUITY_FEE");
-        return obj;
+        if(v("GRANT_FEE")) o["GRANT_FEE"] = v("GRANT_FEE");
+        if(v("EQUITY_FEE")) o["EQUITY_FEE"] = v("EQUITY_FEE");
+        return o;
       }
-      function buildPayload() {
+
+      function getSlidesToRemove() {
+        const input = v("remove_slides");
+        if (!input) return [];
+        // Divide por coma, limpia espacios, filtra vacíos, convierte a número y filtra positivos.
+        return input.split(',')
+                    .map(s => s.trim())
+                    .filter(s => s !== '' && !isNaN(Number(s)))
+                    .map(Number)
+                    .filter(n => n > 0);
+      }
+
+      function buildPayload(){
+        // El campo 'remove_slides' se envía como parámetro de query, no en el body.
         return {
           company_name: v("company_name"),
           contact_email: v("contact_email") || undefined,
           pricing_overrides: buildPricing(),
-          slide_toggles: slideToggles,
+          slide_toggles: slideToggles
         };
       }
 
-      // Demo quick fill
+      /* DEMO FILL */
       document.getElementById("testBtn").onclick = () => {
-        document.getElementById("company_name").value = "Acme Corp";
+        document.getElementById("company_name").value = "Acme Corporation";
         document.getElementById("SETUP_FEE").value = 1500;
         document.getElementById("SHORT_FEE").value = 3500;
-        document.getElementById("FULL_FEE").value = 12000;
+        document.getElementById("FULL_FEE").value  = 12000;
         document.getElementById("GRANT_FEE").value = "9%";
         document.getElementById("EQUITY_FEE").value = "3%";
-        Object.assign(slideToggles, { cover: true, pricing: true });
+        document.getElementById("remove_slides").value = "2, 10"; // Ejemplo para slides a eliminar
+
+        for (const k in slideToggles) slideToggles[k] = true;
+
         drawTags();
-        setStatus("Demo fields loaded.");
+        setStatus("Demo loaded.", "ok");
       };
 
-      // Submit
-      document.getElementById("submitBtn").onclick = async () => {
-        setStatus("");
+      /* BUTTON: PPTX */
+      document.getElementById("btnPPTX").onclick = async ()=>{
         const payload = buildPayload();
+        if(!payload.company_name)
+          return setStatus("Company Name required", "err");
 
-        if (!payload.company_name) {
-          setStatus("Company Name is required.", "err");
-          return;
+        const removeSlides = getSlidesToRemove();
+        let endpoint;
+
+        if (removeSlides.length > 0) {
+          // Si hay slides a remover, usamos el endpoint CUSTOM y pasamos los slides en la URL.
+          const query = removeSlides.map(n => `remove_slides=${n}`).join('&');
+          endpoint = `${API_PPTX_CUSTOM}?${query}`;
+        } else {
+          // Si no, usamos el endpoint estándar.
+          endpoint = API_PPTX;
         }
-        try {
-          setStatus("Generating…");
+
+        try{
           showLoading();
-          const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+          const res = await fetch(endpoint,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
           });
-          if (!res.ok) {
-            const txt = await res.text();
-            throw new Error(`HTTP ${res.status}: ${txt}`);
+
+          if(!res.ok) {
+            const errorText = await res.text();
+            console.error(errorText);
+            throw new Error(`Error generating PPTX (Status: ${res.status})`);
           }
+
           const blob = await res.blob();
-          const fname = `proposal_${payload.company_name.replace(
-            /\s+/g,
-            "_"
-          )}.pptx`;
+          // Usar 'custom' en el nombre si se eliminaron diapositivas
+          const baseName = removeSlides.length > 0 ? "proposal_custom" : "proposal";
+          const fname = `${baseName}_${payload.company_name.replace(/\s+/g,"_")}.pptx`;
+
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
           a.download = fname;
-          document.body.appendChild(a);
           a.click();
-          a.remove();
           URL.revokeObjectURL(url);
-          setStatus("Presentation downloaded ✅", "ok");
-        } catch (err) {
-          console.error(err);
-          setStatus("Error: " + err.message, "err");
-        } finally {
-          hideLoading();
-        }
+
+          setStatus("PPTX downloaded ✔", "ok");
+        } catch(e){
+          setStatus(e.message, "err");
+        } finally { hideLoading(); }
       };
 
-      // init
-      drawTags();
+      /* BUTTON: PDF */
+      document.getElementById("btnPDF").onclick = async ()=>{
+        const payload = buildPayload();
+        if(!payload.company_name)
+          return setStatus("Company Name required", "err");
+
+        const removeSlides = getSlidesToRemove();
+        let endpoint;
+
+        if (removeSlides.length > 0) {
+          // Si hay slides a remover, usamos el endpoint CUSTOM y pasamos los slides en la URL.
+          const query = removeSlides.map(n => `remove_slides=${n}`).join('&');
+          endpoint = `${API_PDF_CUSTOM}?${query}`;
+        } else {
+          // Si no, usamos el endpoint estándar.
+          endpoint = API_PDF;
+        }
+
+        try{
+          showLoading();
+          const res = await fetch(endpoint,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
+          });
+
+          if(!res.ok) {
+            const errorText = await res.text();
+            console.error(errorText);
+            throw new Error(`Error generating PDF (Status: ${res.status})`);
+          }
+
+          const blob = await res.blob();
+          // Usar 'custom' en el nombre si se eliminaron diapositivas
+          const baseName = removeSlides.length > 0 ? "proposal_custom" : "proposal";
+          const fname = `${baseName}_${payload.company_name.replace(/\s+/g,"_")}.pdf`;
+
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = fname;
+          a.click();
+          URL.revokeObjectURL(url);
+
+          setStatus("PDF downloaded ✔", "ok");
+        } catch(e){
+          setStatus(e.message, "err");
+        } finally { hideLoading(); }
+      };
     </script>
   </body>
 </html>
